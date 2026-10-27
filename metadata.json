@@ -1,0 +1,6 @@
+{
+  "name": "IVOCOLIS Express",
+  "description": "Service d'expédition et de suivi de colis en Côte d'Ivoire. Envoi d'Abidjan vers l'intérieur, collecte, suivi en temps réel et gestion logistique.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

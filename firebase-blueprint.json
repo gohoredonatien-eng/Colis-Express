@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "UserProfile": {
+      "collection": "users",
+      "path": "users/{userId}",
+      "fields": {
+        "userId": { "type": "string", "required": true },
+        "displayName": { "type": "string", "required": false },
+        "email": { "type": "string", "required": false },
+        "phone": { "type": "string", "required": false },
+        "createdAt": { "type": "timestamp", "required": true },
+        "updatedAt": { "type": "timestamp", "required": true }
+      }
+    },
+    "Parcel": {
+      "collection": "parcels",
+      "path": "users/{userId}/parcels/{parcelId}",
+      "fields": {
+        "reference": { "type": "string", "required": true },
+        "senderName": { "type": "string", "required": true },
+        "senderPhone": { "type": "string", "required": true },
+        "senderCommune": { "type": "string", "required": true },
+        "senderAddress": { "type": "string", "required": true },
+        "recipientName": { "type": "string", "required": true },
+        "recipientPhone": { "type": "string", "required": true },
+        "destinationCity": { "type": "string", "required": true },
+        "destinationAddress": { "type": "string", "required": true },
+        "parcelCategory": { "type": "string", "required": true },
+        "weightKg": { "type": "number", "required": true },
+        "description": { "type": "string", "required": true },
+        "priceFcfa": { "type": "number", "required": true },
+        "status": { "type": "string", "required": true },
+        "paymentStatus": { "type": "string", "required": true },
+        "paymentMethod": { "type": "string", "required": false },
+        "paymentTransactionId": { "type": "string", "required": false },
+        "userId": { "type": "string", "required": true },
+        "createdAt": { "type": "timestamp", "required": true },
+        "updatedAt": { "type": "timestamp", "required": true },
+        "history": { "type": "list", "required": false }
+      }
+    },
+    "TrackingSummary": {
+      "collection": "tracking",
+      "path": "tracking/{reference}",
+      "fields": {
+        "reference": { "type": "string", "required": true },
+        "destinationCity": { "type": "string", "required": true },
+        "senderCommune": { "type": "string", "required": true },
+        "recipientName": { "type": "string", "required": true },
+        "status": { "type": "string", "required": true },
+        "paymentStatus": { "type": "string", "required": true },
+        "priceFcfa": { "type": "number", "required": true },
+        "updatedAt": { "type": "timestamp", "required": true },
+        "history": { "type": "list", "required": false }
+      }
+    }
+  }
+}

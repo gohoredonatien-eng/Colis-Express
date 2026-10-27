@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidTimestamp(val) {
+      return val is timestamp;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['userId', 'createdAt', 'updatedAt'])
+        && data.userId is string
+        && data.userId.size() > 0
+        && (!('displayName' in data) || data.displayName is string)
+        && (!('email' in data) || data.email is string)
+        && (!('phone' in data) || data.phone is string)
+        && isValidTimestamp(data.createdAt)
+        && isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidParcel(data, userId) {
+      return data.keys().hasAll([
+          'reference', 'senderName', 'senderPhone', 'senderCommune', 'senderAddress',
+          'recipientName', 'recipientPhone', 'destinationCity', 'destinationAddress',
+          'parcelCategory', 'weightKg', 'description', 'priceFcfa', 'status',
+          'paymentStatus', 'userId', 'createdAt', 'updatedAt'
+        ])
+        && data.reference is string && data.reference.size() >= 5
+        && data.senderName is string && data.senderName.size() > 0
+        && data.senderPhone is string
+        && data.senderCommune is string
+        && data.senderAddress is string
+        && data.recipientName is string
+        && data.recipientPhone is string
+        && data.destinationCity is string
+        && data.destinationAddress is string
+        && data.parcelCategory is string
+        && data.weightKg is number && data.weightKg > 0
+        && data.description is string
+        && data.priceFcfa is number && data.priceFcfa >= 1500
+        && data.status is string
+        && data.paymentStatus is string
+        && data.userId == userId
+        && isValidTimestamp(data.createdAt)
+        && isValidTimestamp(data.updatedAt)
+        && (!('paymentMethod' in data) || data.paymentMethod == null || data.paymentMethod is string)
+        && (!('paymentTransactionId' in data) || data.paymentTransactionId == null || data.paymentTransactionId is string)
+        && (!('history' in data) || data.history is list);
+    }
+
+    function isValidTracking(data) {
+      return data.keys().hasAll([
+          'reference', 'destinationCity', 'senderCommune', 'recipientName',
+          'status', 'paymentStatus', 'priceFcfa', 'updatedAt'
+        ])
+        && data.reference is string
+        && data.destinationCity is string
+        && data.senderCommune is string
+        && data.recipientName is string
+        && data.status is string
+        && data.paymentStatus is string
+        && data.priceFcfa is number
+        && isValidTimestamp(data.updatedAt)
+        && (!('history' in data) || data.history is list);
+    }
+
+    // User Profile Documents
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && isValidUser(request.resource.data)
+        && request.resource.data.userId == userId;
+      allow update: if isOwner(userId)
+        && isValidUser(request.resource.data)
+        && request.resource.data.userId == userId
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if false;
+
+      // User's Parcels
+      match /parcels/{parcelId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && isValidParcel(request.resource.data, userId);
+        allow update: if isOwner(userId)
+          && isValidParcel(request.resource.data, userId)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.reference == resource.data.reference;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // Public/Shared Tracking Information
+    match /tracking/{reference} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidTracking(request.resource.data);
+      allow delete: if false;
+    }
+  }
+}
